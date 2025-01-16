@@ -196,7 +196,7 @@ int bf_resize(bf_t *r, limb_t len)
     limb_t *tab;
     
     if (len != r->len) {
-        tab = bf_realloc(r->ctx, r->tab, len * sizeof(limb_t));
+        tab = (limb_t*)bf_realloc(r->ctx, r->tab, len * sizeof(limb_t));
         if (!tab && len != 0)
             return -1;
         r->tab = tab;
@@ -1356,8 +1356,8 @@ int mp_recip(bf_context_t *s, limb_t *tabr, const limb_t *taba, limb_t n)
     if (n <= 2) {
         /* return ceil(B^(2*n)/a) - 1 */
         /* XXX: could avoid allocation */
-        tabu = bf_malloc(s, sizeof(limb_t) * (2 * n + 1));
-        tabt = bf_malloc(s, sizeof(limb_t) * (n + 2));
+        tabu = (limb_t*)bf_malloc(s, sizeof(limb_t) * (2 * n + 1));
+        tabt = (limb_t*)bf_malloc(s, sizeof(limb_t) * (n + 2));
         if (!tabt || !tabu)
             goto fail;
         for(i = 0; i < 2 * n; i++)

@@ -2063,7 +2063,7 @@ static int push_state(REExecContext *s,
         new_size = s->state_stack_size * 3 / 2;
         if (new_size < 8)
             new_size = 8;
-        new_stack = lre_realloc(s->opaque, s->state_stack, new_size * s->state_size);
+        new_stack = (uint8_t*)lre_realloc(s->opaque, s->state_stack, new_size * s->state_size);
         if (!new_stack)
             return -1;
         s->state_stack_size = new_size;
@@ -2213,9 +2213,10 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
             val = get_u32(pc);
             pc += 4;
             ret = push_state(s, capture, stack, stack_len,
-                             pc + (int)val, cptr,
-                             RE_EXEC_STATE_LOOKAHEAD + opcode - REOP_lookahead,
-                             0);
+                            pc + (int)val, cptr,
+                            (REExecStateEnum)(RE_EXEC_STATE_LOOKAHEAD + opcode - REOP_lookahead),
+                            0);
+
             if (ret < 0)
                 return -1;
             break;
@@ -2527,7 +2528,7 @@ int lre_exec(uint8_t **capture,
     for(i = 0; i < s->capture_count * 2; i++)
         capture[i] = NULL;
     alloca_size = s->stack_size_max * sizeof(stack_buf[0]);
-    stack_buf = alloca(alloca_size);
+    stack_buf = (StackInt*)alloca(alloca_size);
     ret = lre_exec_backtrack(s, capture, stack_buf, 0, bc_buf + RE_HEADER_LEN,
                              cbuf + (cindex << cbuf_type), FALSE);
     lre_realloc(s->opaque, s->state_stack, 0);
